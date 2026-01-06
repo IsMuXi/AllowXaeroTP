@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "allow.xaerotp.mixin.client",
+	"compatibilityLevel": "JAVA_21",
+	"client": [
+		"ExampleClientMixin",
+		"XaeroTeleportInterceptMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}
