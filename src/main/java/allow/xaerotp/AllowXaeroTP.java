@@ -14,13 +14,13 @@ public class AllowXaeroTP implements ModInitializer {
 	@Override
 	public void onInitialize() {
 
-		// ① 注册 Payload 类型
+		//注册 Payload 类型
 		PayloadTypeRegistry.playC2S().register(
 				FreeTpPayload.ID,
 				FreeTpPayload.CODEC
 		);
 
-		// ② 注册接收器
+		//注册接收器
 		ServerPlayNetworking.registerGlobalReceiver(
 				FreeTpPayload.ID,
 				(payload, context) -> {
