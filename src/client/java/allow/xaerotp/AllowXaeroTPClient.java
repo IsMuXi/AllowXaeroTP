@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 
 public class AllowXaeroTPClient implements ClientModInitializer {
 
-	// 匹配 tp @s x y z
 	private static final Pattern TP_PATTERN =
 			Pattern.compile("tp\\s+@s\\s+(-?\\d+(?:\\.\\d+)?)\\s+(-?\\d+(?:\\.\\d+)?)\\s+(-?\\d+(?:\\.\\d+)?)");
 
@@ -21,14 +20,12 @@ public class AllowXaeroTPClient implements ClientModInitializer {
 
 		ClientSendMessageEvents.ALLOW_COMMAND.register(command -> {
 
-			// Xaero 的传送一定包含 tp @s
 			if (!command.contains("tp @s")) {
 				return true;
 			}
 
 			Matcher matcher = TP_PATTERN.matcher(command);
 			if (!matcher.find()) {
-				// 不是标准 tp，直接拦掉，防止原命令执行
 				return false;
 			}
 
