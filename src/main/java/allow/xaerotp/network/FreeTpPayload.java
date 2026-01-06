@@ -13,7 +13,7 @@ public record FreeTpPayload(
 ) implements CustomPayload {
 
     public static final Id<FreeTpPayload> ID =
-            new Id<>(Identifier.of("modid", "free_tp")); // ← 改这里
+            new Id<>(Identifier.of("modid", "free_tp"));
 
     public static final PacketCodec<
             net.minecraft.network.RegistryByteBuf,
