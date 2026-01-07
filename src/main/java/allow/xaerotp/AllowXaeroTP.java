@@ -7,10 +7,10 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.Heightmap;
 
 public class AllowXaeroTP implements ModInitializer {
-
 	@Override
 	public void onInitialize() {
 
@@ -38,14 +38,43 @@ public class AllowXaeroTP implements ModInitializer {
 		);
 	}
 
+	private static final int COOLDOWN_SECONDS = 30; // ← 可之后接配置文件
 
 	private static void handleTeleport(ServerPlayerEntity player,
-									   net.minecraft.util.Identifier dimId,
+									   Identifier dimId,
 									   int x, int y, int z) {
+
+		if (TeleportCooldown.shouldIgnore(player.getUuid())) {
+			return;
+		}
+		if (allow.xaerotp.TeleportCooldown.isOnCooldown(
+				player.getUuid(),
+				COOLDOWN_SECONDS
+		)) {
+			long remain = allow.xaerotp.TeleportCooldown.getRemaining(
+					player.getUuid(),
+					COOLDOWN_SECONDS
+			);
+			player.sendMessage(
+					net.minecraft.text.Text.literal(
+							"§c传送冷却中，还需 " + remain + " 秒"
+					),
+					false
+			);
+			return;
+		}
 
 		ServerWorld world = player.getServer().getWorld(
 				RegistryKey.of(RegistryKeys.WORLD, dimId)
 		);
+
+		if (world == null) {
+			player.sendMessage(
+					net.minecraft.text.Text.literal("§c目标维度不存在"),
+					false
+			);
+			return;
+		}
 
 		if (y == 32767) {
 			y = world.getTopY(
@@ -62,5 +91,7 @@ public class AllowXaeroTP implements ModInitializer {
 				player.getYaw(),
 				player.getPitch()
 		);
+
+		allow.xaerotp.TeleportCooldown.record(player.getUuid());
 	}
 }
