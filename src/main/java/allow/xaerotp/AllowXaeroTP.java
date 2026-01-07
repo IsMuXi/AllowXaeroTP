@@ -1,4 +1,5 @@
 package allow.xaerotp;
+import allow.xaerotp.config.ConfigManager;
 import allow.xaerotp.network.FreeTpPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -7,12 +8,14 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.Heightmap;
 
 public class AllowXaeroTP implements ModInitializer {
 	@Override
 	public void onInitialize() {
+		ConfigManager.load();
 
 		PayloadTypeRegistry.playC2S().register(
 				FreeTpPayload.ID,
@@ -37,9 +40,6 @@ public class AllowXaeroTP implements ModInitializer {
 				}
 		);
 	}
-
-	private static final int COOLDOWN_SECONDS = 30; // ← 可之后接配置文件
-
 	private static void handleTeleport(ServerPlayerEntity player,
 									   Identifier dimId,
 									   int x, int y, int z) {
@@ -47,20 +47,15 @@ public class AllowXaeroTP implements ModInitializer {
 		if (TeleportCooldown.shouldIgnore(player.getUuid())) {
 			return;
 		}
-		if (allow.xaerotp.TeleportCooldown.isOnCooldown(
-				player.getUuid(),
-				COOLDOWN_SECONDS
-		)) {
-			long remain = allow.xaerotp.TeleportCooldown.getRemaining(
-					player.getUuid(),
-					COOLDOWN_SECONDS
-			);
-			player.sendMessage(
-					net.minecraft.text.Text.literal(
-							"§c传送冷却中，还需 " + remain + " 秒"
-					),
-					false
-			);
+
+		if (TeleportCooldown.isOnCooldown(player.getUuid())) {
+			if (ConfigManager.CONFIG.send_cooldown_message) {
+				long remain = TeleportCooldown.getRemaining(player.getUuid());
+				player.sendMessage(
+						Text.literal("§c传送冷却中，还需 " + remain + " 秒"),
+						false
+				);
+			}
 			return;
 		}
 
@@ -69,10 +64,7 @@ public class AllowXaeroTP implements ModInitializer {
 		);
 
 		if (world == null) {
-			player.sendMessage(
-					net.minecraft.text.Text.literal("§c目标维度不存在"),
-					false
-			);
+			player.sendMessage(Text.literal("§c目标维度不存在"), false);
 			return;
 		}
 
@@ -92,6 +84,6 @@ public class AllowXaeroTP implements ModInitializer {
 				player.getPitch()
 		);
 
-		allow.xaerotp.TeleportCooldown.record(player.getUuid());
+		TeleportCooldown.record(player.getUuid());
 	}
 }

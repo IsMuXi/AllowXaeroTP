@@ -8,11 +8,16 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 
-public class ConfigManager {
+public final class ConfigManager {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON =
+            new GsonBuilder().setPrettyPrinting().create();
+
     private static final File CONFIG_FILE =
-            FabricLoader.getInstance().getConfigDir().resolve("xaero_free_tp.json").toFile();
+            FabricLoader.getInstance()
+                    .getConfigDir()
+                    .resolve("allowxaerotp.json")
+                    .toFile();
 
     public static ModConfig CONFIG;
 
@@ -23,7 +28,17 @@ public class ConfigManager {
                 save();
                 return;
             }
-            CONFIG = GSON.fromJson(new FileReader(CONFIG_FILE), ModConfig.class);
+
+            CONFIG = GSON.fromJson(
+                    new FileReader(CONFIG_FILE),
+                    ModConfig.class
+            );
+
+            if (CONFIG == null) {
+                CONFIG = new ModConfig();
+                save();
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             CONFIG = new ModConfig();
